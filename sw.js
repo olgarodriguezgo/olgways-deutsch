@@ -1,5 +1,5 @@
-const CACHE = 'olgways-deutsch-v2';
-const ASSETS = ['.', 'index.html', 'style.css', 'app.js', 'manifest.json', 'icon.svg'];
+const CACHE = 'olgways-deutsch-v3';
+const ASSETS = ['.', 'index.html', 'style.css', 'app.js', 'manifest.json', 'icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
