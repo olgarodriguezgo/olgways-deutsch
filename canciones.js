@@ -121,7 +121,10 @@ async function fetchPlaylistTracks(token) {
 
   while (url) {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error('Error leyendo playlist de Spotify');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(`Error ${res.status}: ${errData?.error?.message || 'Error leyendo playlist'}`);
+    }
     const data = await res.json();
     const valid = (data.items || []).filter(i => i.track && i.track.id);
     tracks = tracks.concat(valid.map(i => ({
