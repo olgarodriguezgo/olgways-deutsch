@@ -125,7 +125,7 @@ async function fetchPlaylistTracks(token) {
     throw new Error(`Error ${res.status}: ${errData?.error?.message || 'Error leyendo playlist'}`);
   }
   const data = await res.json();
-  const items = data.tracks?.items || [];
+  const items = data.items || data.tracks?.items || [];
   return items.filter(i => i.track && i.track.id).map(i => ({
     titulo:   i.track.name,
     artista:  i.track.artists.map(a => a.name).join(', '),
