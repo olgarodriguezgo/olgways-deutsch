@@ -117,7 +117,7 @@ async function getValidToken() {
 
 async function fetchPlaylistTracks(token) {
   let tracks = [];
-  let url = `https://api.spotify.com/v1/playlists/${SPOTIFY.playlistId}/tracks?limit=100&fields=next,items(track(id,name,artists,external_urls,album(name,images),preview_url))`;
+  let url = `https://api.spotify.com/v1/playlists/${SPOTIFY.playlistId}/tracks?limit=100`;
 
   while (url) {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
