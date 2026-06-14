@@ -96,13 +96,16 @@ function completeBlock(num) {
   const data = getStorage();
   const key  = getTodayKey();
   if (!data.days[key]) data.days[key] = [];
-  if (!data.days[key].includes(num)) {
+  const idx = data.days[key].indexOf(num);
+  if (idx === -1) {
     data.days[key].push(num);
-    saveStorage(data);
     if (navigator.vibrate) navigator.vibrate(50);
     if (data.days[key].length === 6) celebrate();
-    renderAll();
+  } else {
+    data.days[key].splice(idx, 1);
   }
+  saveStorage(data);
+  renderAll();
 }
 
 // ===== RENDER: CABECERA Y PROGRESO =====
@@ -147,9 +150,9 @@ function renderHeader() {
     if (!block || !btn) continue;
     if (completed.includes(i)) {
       block.classList.add('completed');
-      btn.textContent = '✅ Completado';
+      btn.textContent = '✅ Completado · deshacer';
       btn.classList.add('done');
-      btn.onclick = null;
+      btn.onclick = () => completeBlock(i);
     } else {
       block.classList.remove('completed');
       btn.textContent = '✅ Marcar como completado';
