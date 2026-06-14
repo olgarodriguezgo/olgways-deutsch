@@ -43,7 +43,7 @@ async function generateCodeChallenge(verifier) {
 async function loginWithSpotify() {
   const verifier   = generateCodeVerifier();
   const challenge  = await generateCodeChallenge(verifier);
-  sessionStorage.setItem('spotify_verifier', verifier);
+  localStorage.setItem('spotify_verifier', verifier);
 
   const params = new URLSearchParams({
     response_type:         'code',
@@ -59,7 +59,7 @@ async function loginWithSpotify() {
 }
 
 async function exchangeCodeForToken(code) {
-  const verifier = sessionStorage.getItem('spotify_verifier');
+  const verifier = localStorage.getItem('spotify_verifier');
   const res = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -181,10 +181,19 @@ async function initSpotify() {
   if (error) return { status: 'error', error: 'El usuario canceló el login de Spotify.' };
 
   if (code) {
-    // Limpiar la URL sin recargar
     window.history.replaceState({}, '', window.location.pathname);
-    const data = await exchangeCodeForToken(code);
-    saveTokens(data);
+    try {
+      // Borrar token viejo antes de guardar el nuevo
+      localStorage.removeItem('sp_access');
+      localStorage.removeItem('sp_refresh');
+      localStorage.removeItem('sp_expiry');
+      localStorage.removeItem('sp_playlist');
+      localStorage.removeItem('sp_playlist_exp');
+      const data = await exchangeCodeForToken(code);
+      saveTokens(data);
+    } catch (e) {
+      return { status: 'error', error: 'Error en login: ' + e.message };
+    }
   }
 
   return { status: 'ready' };
