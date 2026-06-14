@@ -125,15 +125,18 @@ async function fetchPlaylistTracks(token) {
     throw new Error(`Error ${res.status}: ${errData?.error?.message || 'Error leyendo playlist'}`);
   }
   const data = await res.json();
-  const items = data.items || data.tracks?.items || [];
-  return items.filter(i => i.track && i.track.id).map(i => ({
-    titulo:   i.track.name,
-    artista:  i.track.artists.map(a => a.name).join(', '),
-    album:    i.track.album.name,
-    url:      i.track.external_urls.spotify,
-    caratula: i.track.album.images[0]?.url || '',
-    preview:  i.track.preview_url
-  }));
+  const items = data.items?.items || data.tracks?.items || [];
+  return items
+    .map(i => i.track || i.item)
+    .filter(t => t && t.id && t.type === 'track')
+    .map(t => ({
+      titulo:   t.name,
+      artista:  t.artists.map(a => a.name).join(', '),
+      album:    t.album.name,
+      url:      t.external_urls.spotify,
+      caratula: t.album.images[0]?.url || '',
+      preview:  t.preview_url
+    }));
 }
 
 async function getPlaylistCached(token) {
