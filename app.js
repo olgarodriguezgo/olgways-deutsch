@@ -31,6 +31,52 @@ function getTodayVocab() {
   return { words: VOCAB.slice(start, start + WORDS_PER_DAY), startNum: start + 1 };
 }
 
+// ===== STREAK =====
+function getStreak() {
+  const data    = getStorage();
+  const today   = new Date();
+  const todayKey = getTodayKey();
+  const startOffset = (data.days[todayKey]?.length > 0) ? 0 : 1;
+  let streak = 0;
+  for (let i = startOffset; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    if (data.days[key]?.length > 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function getBestStreak() {
+  const data = getStorage();
+  const keys = Object.keys(data.days)
+    .filter(k => data.days[k].length > 0)
+    .sort();
+  if (!keys.length) return 0;
+  let best = 1, current = 1;
+  for (let i = 1; i < keys.length; i++) {
+    const diff = Math.round((new Date(keys[i]) - new Date(keys[i-1])) / 86400000);
+    if (diff === 1) { current++; best = Math.max(best, current); }
+    else current = 1;
+  }
+  return best;
+}
+
+// ===== CELEBRATION =====
+function celebrate() {
+  const items = ['🎉','⭐','🇩🇪','🔥','✨','🏆','🌟','🎊'];
+  for (let i = 0; i < 22; i++) {
+    const el = document.createElement('span');
+    el.className = 'confetti-piece';
+    el.textContent = items[i % items.length];
+    const rot = (Math.random() * 720 - 360).toFixed(0) + 'deg';
+    el.style.cssText = `font-size:${20+Math.random()*18}px;left:${(Math.random()*96).toFixed(1)}vw;bottom:-40px;--rot:${rot};animation:floatUp ${(1.6+Math.random()*1.2).toFixed(2)}s ease-out forwards;animation-delay:${(Math.random()*.6).toFixed(2)}s`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
 // ===== STORAGE =====
 function getStorage() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { days: {} }; }
@@ -53,6 +99,8 @@ function completeBlock(num) {
   if (!data.days[key].includes(num)) {
     data.days[key].push(num);
     saveStorage(data);
+    if (navigator.vibrate) navigator.vibrate(50);
+    if (data.days[key].length === 6) celebrate();
     renderAll();
   }
 }
@@ -78,6 +126,19 @@ function renderHeader() {
 
   // Barra de progreso
   document.getElementById('progressBar').style.width = `${(count / 6) * 100}%`;
+
+  // Racha
+  const streak = getStreak();
+  const sb = document.getElementById('streakBadge');
+  if (sb) {
+    if (streak > 0) {
+      const label = streak === 1 ? 'día seguido' : 'días seguidos';
+      sb.textContent = `🔥 ${streak} ${label}`;
+      sb.style.display = 'block';
+    } else {
+      sb.style.display = 'none';
+    }
+  }
 
   // Estado de cada botón y tarjeta
   for (let i = 1; i <= 6; i++) {
@@ -186,6 +247,35 @@ function renderVocabBlock() {
   `;
 }
 
+// ===== RENDER: ESTADÍSTICAS =====
+function renderStats() {
+  const el = document.getElementById('statsContent');
+  if (!el) return;
+  const data       = getStorage();
+  const allDays    = Object.values(data.days);
+  const totalDays  = allDays.filter(d => d.length > 0).length;
+  if (!totalDays) { el.innerHTML = ''; return; }
+  const perfectDays  = allDays.filter(d => d.length === 6).length;
+  const bestStreak   = getBestStreak();
+  const currentStreak = getStreak();
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">🔥 ${currentStreak}</div>
+        <div class="stat-label">Racha actual</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">🏆 ${bestStreak}</div>
+        <div class="stat-label">Mejor racha</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">⭐ ${perfectDays}</div>
+        <div class="stat-label">Días perfectos</div>
+      </div>
+    </div>
+  `;
+}
+
 // ===== RENDER: HISTORIAL =====
 function renderHistory() {
   const data = getStorage();
@@ -221,6 +311,7 @@ function renderHistory() {
 // ===== RENDER GLOBAL =====
 function renderAll() {
   renderHeader();
+  renderStats();
   renderHistory();
 }
 

@@ -141,6 +141,58 @@ body {
   margin: 0 auto;
 }
 
+/* ===== STREAK BADGE ===== */
+.streak-badge {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,.9);
+  margin-top: 10px;
+  min-height: 0;
+  transition: opacity .3s;
+}
+
+/* ===== STATS GRID ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--rs);
+  padding: 14px 8px 12px;
+  text-align: center;
+  box-shadow: var(--sh);
+}
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--t1);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-weight: 600;
+}
+
+/* ===== CELEBRATION ===== */
+@keyframes floatUp {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateY(-110vh) rotate(var(--rot, 360deg)) scale(.6); opacity: 0; }
+}
+.confetti-piece {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  user-select: none;
+}
+
 /* ===== BLOCK CARDS ===== */
 .block {
   background: var(--card);
