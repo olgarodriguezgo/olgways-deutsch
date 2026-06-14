@@ -117,28 +117,23 @@ async function getValidToken() {
 // ─── Playlist fetch ───────────────────────────────────────────────────────────
 
 async function fetchPlaylistTracks(token) {
-  let tracks = [];
-  let url = `https://api.spotify.com/v1/playlists/${SPOTIFY.playlistId}/tracks?limit=100`;
-
-  while (url) {
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(`Error ${res.status}: ${errData?.error?.message || 'Error leyendo playlist'}`);
-    }
-    const data = await res.json();
-    const valid = (data.items || []).filter(i => i.track && i.track.id);
-    tracks = tracks.concat(valid.map(i => ({
-      titulo:    i.track.name,
-      artista:   i.track.artists.map(a => a.name).join(', '),
-      album:     i.track.album.name,
-      url:       i.track.external_urls.spotify,
-      caratula:  i.track.album.images[0]?.url || '',
-      preview:   i.track.preview_url
-    })));
-    url = data.next;
+  const res = await fetch(`https://api.spotify.com/v1/playlists/${SPOTIFY.playlistId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`Error ${res.status}: ${errData?.error?.message || 'Error leyendo playlist'}`);
   }
-  return tracks;
+  const data = await res.json();
+  const items = data.tracks?.items || [];
+  return items.filter(i => i.track && i.track.id).map(i => ({
+    titulo:   i.track.name,
+    artista:  i.track.artists.map(a => a.name).join(', '),
+    album:    i.track.album.name,
+    url:      i.track.external_urls.spotify,
+    caratula: i.track.album.images[0]?.url || '',
+    preview:  i.track.preview_url
+  }));
 }
 
 async function getPlaylistCached(token) {
