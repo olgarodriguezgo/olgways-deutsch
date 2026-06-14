@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <!-- PWA / iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OlgDeutsch">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#9B8EC4">
+  <meta name="description" content="Tu app diaria para aprender alemán">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <title>Olgways Deutsch</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER STICKY -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="app-logo">
+          <span class="logo-flag">🇩🇪</span>
+          <h1 class="app-title">Olgways Deutsch</h1>
+        </div>
+        <div class="today-date" id="todayDate"></div>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-label-row">
+          <span id="progressText">0/6 bloques completados hoy</span>
+          <span id="progressEmoji">💪</span>
+        </div>
+        <div class="progress-dots" id="progressDots">
+          <div class="dot" id="dot-1"></div>
+          <div class="dot" id="dot-2"></div>
+          <div class="dot" id="dot-3"></div>
+          <div class="dot" id="dot-4"></div>
+          <div class="dot" id="dot-5"></div>
+          <div class="dot" id="dot-6"></div>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="app-main">
+
+    <!-- BLOQUE 1: VIDEO -->
+    <section class="block" id="block-1">
+      <div class="block-header">
+        <span class="block-emoji">🎥</span>
+        <h2 class="block-title">Vídeo del día</h2>
+        <span class="type-badge" id="videoBadge"></span>
+      </div>
+      <div id="videoContent"></div>
+      <button class="btn-complete" id="btn-1" onclick="completeBlock(1)">
+        ✅ Marcar como completado
+      </button>
+    </section>
+
+    <!-- BLOQUE 2: CANCIÓN -->
+    <section class="block" id="block-2">
+      <div class="block-header">
+        <span class="block-emoji">🎵</span>
+        <h2 class="block-title">Canción del día</h2>
+      </div>
+      <div id="songContent"></div>
+      <button class="btn-complete" id="btn-2" onclick="completeBlock(2)">
+        ✅ Marcar como completado
+      </button>
+    </section>
+
+    <!-- BLOQUE 3: VOCABULARIO -->
+    <section class="block" id="block-3">
+      <div class="block-header">
+        <span class="block-emoji">📚</span>
+        <h2 class="block-title">Vocabulario del día</h2>
+        <span class="type-badge" id="vocabBadge"></span>
+      </div>
+      <div id="vocabContent"></div>
+      <button class="btn-complete" id="btn-3" onclick="completeBlock(3)">
+        ✅ Marcar como completado
+      </button>
+    </section>
+
+    <!-- BLOQUE 4: QUIZLET -->
+    <section class="block" id="block-4">
+      <div class="block-header">
+        <span class="block-emoji">📖</span>
+        <h2 class="block-title">Quizlet</h2>
+      </div>
+      <div class="simple-block-content">
+        <p class="simple-block-text">Añade las 5 palabras de hoy a tu set de Quizlet y repasa las anteriores. La repetición espaciada es el método más efectivo para memorizar vocabulario a largo plazo.</p>
+        <a href="https://quizlet.com" target="_blank" rel="noopener" class="btn-external">
+          📖 Abrir Quizlet
+        </a>
+      </div>
+      <button class="btn-complete" id="btn-4" onclick="completeBlock(4)">
+        ✅ Marcar como completado
+      </button>
+    </section>
+
+    <!-- BLOQUE 5: DUOLINGO -->
+    <section class="block" id="block-5">
+      <div class="block-header">
+        <span class="block-emoji">🦉</span>
+        <h2 class="block-title">Duolingo</h2>
+      </div>
+      <div class="simple-block-content">
+        <p class="simple-block-text">¿Has hecho tu lección de Duolingo hoy? Mantén tu racha viva. Incluso 5 minutos al día hacen una diferencia enorme a lo largo del tiempo.</p>
+        <a href="https://duolingo.com" target="_blank" rel="noopener" class="btn-external">
+          🦉 Abrir Duolingo
+        </a>
+      </div>
+      <button class="btn-complete" id="btn-5" onclick="completeBlock(5)">
+        ✅ Marcar como completado
+      </button>
+    </section>
+
+    <!-- BLOQUE 6: DEUTSCHTOK -->
+    <section class="block" id="block-6">
+      <div class="block-header">
+        <span class="block-emoji">🎬</span>
+        <h2 class="block-title">DeutschTok</h2>
+      </div>
+      <div class="simple-block-content">
+        <p class="simple-block-text">Consume contenido en alemán en TikTok. Sigue cuentas alemanas, mira vídeos con subtítulos y deja que tu cerebro absorba el idioma de forma natural.</p>
+        <a href="https://tiktok.com" target="_blank" rel="noopener" class="btn-external">
+          🎬 Abrir DeutschTok
+        </a>
+      </div>
+      <button class="btn-complete" id="btn-6" onclick="completeBlock(6)">
+        ✅ Marcar como completado
+      </button>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="history-section">
+      <h2 class="section-title">📅 Mi historial</h2>
+      <div class="history-list" id="historyList"></div>
+    </section>
+
+  </main>
+
+  <script src="videos.js"></script>
+  <script src="vocab.js"></script>
+  <script src="canciones.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
