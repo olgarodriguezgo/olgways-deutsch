@@ -171,7 +171,7 @@ function getDayIndex(total) {
  * Returns { status: 'ok'|'needs_login'|'error', cancion?, error? }
  */
 async function initSpotify() {
-  // ¿Viene Spotify de vuelta con un código?
+  // Is Spotify redirecting back with an auth code?
   const params = new URLSearchParams(window.location.search);
   const code   = params.get('code');
   const error  = params.get('error');
