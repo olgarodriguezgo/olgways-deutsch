@@ -1,9 +1,9 @@
-// ===== CONSTANTES =====
+// ===== CONSTANTS =====
 const TYPE_ROTATION = ['listening', 'cultura', 'vocabulario', 'conversación', 'pronunciación', 'gramática práctica'];
 const STORAGE_KEY   = 'olgways_deutsch';
 const WORDS_PER_DAY = 5;
 
-// ===== UTILS DE FECHA =====
+// ===== DATE UTILS =====
 function getTodayKey() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -14,17 +14,17 @@ function getDayOfYear() {
   return Math.floor((now - start) / 86400000);
 }
 
-// ===== VÍDEO DEL DÍA =====
+// ===== VIDEO OF THE DAY =====
 function getTodayVideo() {
   const day  = getDayOfYear();
   const type = TYPE_ROTATION[day % TYPE_ROTATION.length];
   const pool = VIDEOS.filter(v => v.tipo === type);
-  // Si no hay vídeos de ese tipo (no debería pasar), fallback a todos
+  // Fallback to all videos if none found for this type (shouldn't happen)
   const list = pool.length ? pool : VIDEOS;
   return { video: list[day % list.length], type };
 }
 
-// ===== VOCABULARIO DEL DÍA =====
+// ===== VOCABULARY OF THE DAY =====
 function getTodayVocab() {
   const day   = getDayOfYear();
   const start = (day * WORDS_PER_DAY) % VOCAB.length;
@@ -33,9 +33,10 @@ function getTodayVocab() {
 
 // ===== STREAK =====
 function getStreak() {
-  const data    = getStorage();
-  const today   = new Date();
+  const data     = getStorage();
+  const today    = new Date();
   const todayKey = getTodayKey();
+  // If today has no entries yet, start counting from yesterday
   const startOffset = (data.days[todayKey]?.length > 0) ? 0 : 1;
   let streak = 0;
   for (let i = startOffset; i < 365; i++) {
@@ -91,7 +92,7 @@ function getTodayCompleted() {
   return getStorage().days[getTodayKey()] || [];
 }
 
-// Expuesta globalmente para los botones onclick del HTML
+// Exposed globally for the HTML onclick buttons
 function completeBlock(num) {
   const data = getStorage();
   const key  = getTodayKey();
@@ -108,29 +109,29 @@ function completeBlock(num) {
   renderAll();
 }
 
-// ===== RENDER: CABECERA Y PROGRESO =====
+// ===== RENDER: HEADER & PROGRESS =====
 function renderHeader() {
   const completed = getTodayCompleted();
   const count     = completed.length;
 
-  // Fecha bonita
+  // Formatted date
   document.getElementById('todayDate').innerHTML =
     new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  // Texto y emoji de progreso
+  // Progress text and emoji
   document.getElementById('progressText').textContent = `${count}/6 bloques completados hoy`;
   const emojis = ['💪', '🌱', '⚡', '🔥', '🚀', '🌟', '🏆'];
   document.getElementById('progressEmoji').textContent = emojis[Math.min(count, 6)];
 
-  // Puntos
+  // Progress dots
   for (let i = 1; i <= 6; i++) {
     document.getElementById(`dot-${i}`).classList.toggle('done', completed.includes(i));
   }
 
-  // Barra de progreso
+  // Progress bar
   document.getElementById('progressBar').style.width = `${(count / 6) * 100}%`;
 
-  // Racha
+  // Streak badge
   const streak = getStreak();
   const sb = document.getElementById('streakBadge');
   if (sb) {
@@ -143,7 +144,7 @@ function renderHeader() {
     }
   }
 
-  // Estado de cada botón y tarjeta
+  // Block button and card state
   for (let i = 1; i <= 6; i++) {
     const block = document.getElementById(`block-${i}`);
     const btn   = document.getElementById(`btn-${i}`);
@@ -162,7 +163,7 @@ function renderHeader() {
   }
 }
 
-// ===== RENDER: BLOQUE 1 — VÍDEO =====
+// ===== RENDER: BLOCK 1 — VIDEO =====
 function renderVideoBlock() {
   const { video, type } = getTodayVideo();
   document.getElementById('videoBadge').textContent = type;
@@ -175,12 +176,12 @@ function renderVideoBlock() {
   `;
 }
 
-// ===== RENDER: BLOQUE 2 — CANCIÓN (Spotify) =====
+// ===== RENDER: BLOCK 2 — SONG (Spotify) =====
 async function renderSongBlock() {
   const container = document.getElementById('songContent');
   container.innerHTML = `<p style="color:var(--t3);font-size:14px;text-align:center;padding:12px 0;">Conectando con Spotify...</p>`;
 
-  // Gestionar callback de Spotify si viene redirigido
+  // Handle Spotify OAuth callback if redirected back
   await initSpotify();
 
   const result = await getDailyCancion();
@@ -224,7 +225,7 @@ async function renderSongBlock() {
   `;
 }
 
-// ===== RENDER: BLOQUE 3 — VOCABULARIO =====
+// ===== RENDER: BLOCK 3 — VOCABULARY =====
 function renderVocabBlock() {
   const { words, startNum } = getTodayVocab();
   document.getElementById('vocabBadge').textContent = `#${startNum}–${startNum + 4}`;
@@ -250,16 +251,16 @@ function renderVocabBlock() {
   `;
 }
 
-// ===== RENDER: ESTADÍSTICAS =====
+// ===== RENDER: STATS =====
 function renderStats() {
   const el = document.getElementById('statsContent');
   if (!el) return;
-  const data       = getStorage();
-  const allDays    = Object.values(data.days);
-  const totalDays  = allDays.filter(d => d.length > 0).length;
+  const data          = getStorage();
+  const allDays       = Object.values(data.days);
+  const totalDays     = allDays.filter(d => d.length > 0).length;
   if (!totalDays) { el.innerHTML = ''; return; }
-  const perfectDays  = allDays.filter(d => d.length === 6).length;
-  const bestStreak   = getBestStreak();
+  const perfectDays   = allDays.filter(d => d.length === 6).length;
+  const bestStreak    = getBestStreak();
   const currentStreak = getStreak();
   el.innerHTML = `
     <div class="stats-grid">
@@ -279,7 +280,7 @@ function renderStats() {
   `;
 }
 
-// ===== RENDER: HISTORIAL =====
+// ===== RENDER: HISTORY =====
 function renderHistory() {
   const data = getStorage();
   const days = Object.entries(data.days)
@@ -311,7 +312,7 @@ function renderHistory() {
   }).join('');
 }
 
-// ===== RENDER GLOBAL =====
+// ===== GLOBAL RENDER =====
 function renderAll() {
   renderHeader();
   renderStats();
@@ -323,7 +324,7 @@ async function init() {
   renderAll();
   renderVideoBlock();
   renderVocabBlock();
-  renderSongBlock(); // async pero no bloqueante
+  renderSongBlock(); // async, non-blocking
 }
 
 // ===== SERVICE WORKER =====

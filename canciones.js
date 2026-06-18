@@ -1,19 +1,19 @@
 /*
- * AUTENTICACIÓN SPOTIFY — PKCE Flow
+ * SPOTIFY AUTHENTICATION — PKCE Flow
  *
- * Por qué PKCE y no Client Credentials:
- *   - Client Credentials expone tu Client Secret en el código fuente (cualquiera puede verlo)
- *   - Client Credentials bloquea CORS en el navegador (Spotify no lo permite desde frontend)
- *   - PKCE es el estándar recomendado por Spotify para apps de navegador / PWA
- *   - No necesita Client Secret — solo el Client ID (que sí puede estar en el frontend)
- *   - Requiere que te loguees una vez con tu cuenta de Spotify
+ * Why PKCE and not Client Credentials:
+ *   - Client Credentials exposes your Client Secret in source code (anyone can see it)
+ *   - Client Credentials is blocked by CORS in the browser (Spotify doesn't allow it from frontend)
+ *   - PKCE is Spotify's recommended standard for browser / PWA apps
+ *   - Doesn't need a Client Secret — only the Client ID (safe to expose in frontend)
+ *   - Requires logging in once with your Spotify account
  *
- * CONFIGURACIÓN REQUERIDA EN SPOTIFY DEVELOPER DASHBOARD:
- *   1. Ve a https://developer.spotify.com/dashboard
- *   2. Abre tu app → Edit Settings
- *   3. En "Redirect URIs" añade la URL donde sirves esta app
- *      (ej: http://localhost:8080 para pruebas, o tu dominio real)
- *   4. Guarda cambios
+ * REQUIRED SETUP IN SPOTIFY DEVELOPER DASHBOARD:
+ *   1. Go to https://developer.spotify.com/dashboard
+ *   2. Open your app → Edit Settings
+ *   3. Under "Redirect URIs" add the URL where you serve this app
+ *      (e.g. http://localhost:8080 for local dev, or your real domain)
+ *   4. Save changes
  */
 
 const SPOTIFY = {
@@ -23,7 +23,7 @@ const SPOTIFY = {
   redirectUri: window.location.origin + window.location.pathname.replace(/index\.html$/, '')
 };
 
-// ─── Helpers PKCE ────────────────────────────────────────────────────────────
+// ─── PKCE Helpers ────────────────────────────────────────────────────────────
 
 function generateCodeVerifier(length = 64) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
@@ -38,7 +38,7 @@ async function generateCodeChallenge(verifier) {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
+// ─── Auth ────────────────────────────────────────────────────────────────────
 
 async function loginWithSpotify() {
   const verifier   = generateCodeVerifier();
@@ -89,10 +89,10 @@ async function refreshAccessToken(refreshToken) {
   return res.json();
 }
 
-// ─── Token storage ────────────────────────────────────────────────────────────
+// ─── Token storage ───────────────────────────────────────────────────────────
 
 function saveTokens({ access_token, refresh_token, expires_in }) {
-  const expiry = Date.now() + (expires_in - 60) * 1000; // 1 min de margen
+  const expiry = Date.now() + (expires_in - 60) * 1000; // 1 min safety margin
   localStorage.setItem('sp_access',  access_token);
   localStorage.setItem('sp_expiry',  expiry);
   if (refresh_token) localStorage.setItem('sp_refresh', refresh_token);
@@ -111,10 +111,10 @@ async function getValidToken() {
     return data.access_token;
   }
 
-  return null; // necesita login
+  return null; // needs login
 }
 
-// ─── Playlist fetch ───────────────────────────────────────────────────────────
+// ─── Playlist fetch ──────────────────────────────────────────────────────────
 
 async function fetchPlaylistTracks(token) {
   const res = await fetch(`https://api.spotify.com/v1/playlists/${SPOTIFY.playlistId}`, {
@@ -154,7 +154,7 @@ async function getPlaylistCached(token) {
   return tracks;
 }
 
-// ─── Canción del día ──────────────────────────────────────────────────────────
+// ─── Song of the day ─────────────────────────────────────────────────────────
 
 function getDayIndex(total) {
   const now   = new Date();
@@ -163,12 +163,12 @@ function getDayIndex(total) {
   return day % total;
 }
 
-// ─── API pública ──────────────────────────────────────────────────────────────
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Llama a esta función al cargar la página.
- * Maneja el callback de Spotify y el login inicial.
- * Devuelve { status: 'ok'|'needs_login'|'error', cancion?, error? }
+ * Call this function on page load.
+ * Handles the Spotify OAuth callback and initial login.
+ * Returns { status: 'ok'|'needs_login'|'error', cancion?, error? }
  */
 async function initSpotify() {
   // ¿Viene Spotify de vuelta con un código?
@@ -181,7 +181,7 @@ async function initSpotify() {
   if (code) {
     window.history.replaceState({}, '', window.location.pathname);
     try {
-      // Borrar token viejo antes de guardar el nuevo
+      // Clear old token before saving the new one
       localStorage.removeItem('sp_access');
       localStorage.removeItem('sp_refresh');
       localStorage.removeItem('sp_expiry');
@@ -207,7 +207,7 @@ async function getDailyCancion() {
     const cancion = tracks[getDayIndex(tracks.length)];
     return { status: 'ok', cancion };
   } catch (e) {
-    // Si el token expiró y el refresh falló, forzar login de nuevo
+    // If token expired and refresh failed, force login again
     if (e.message.includes('401')) {
       localStorage.removeItem('sp_access');
       localStorage.removeItem('sp_refresh');
